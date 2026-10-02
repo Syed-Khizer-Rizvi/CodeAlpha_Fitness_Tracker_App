@@ -62,5 +62,5 @@ This app was developed as **Task 3** of the **CodeAlpha App Development Internsh
 
 ## Author
 
-**Syed Muhammad Khizer Rizvi**
+**Syed Khizer Rizvi**
 - GitHub: [@Syed-Khizer-Rizvi](https://github.com/Syed-Khizer-Rizvi)
