@@ -13,11 +13,6 @@ A modern fitness tracking app built with Flutter featuring a sleek dark theme wi
 - **SQLite Storage** - All data stored locally on your device
 - **Dark Theme** - Premium dark UI with purple/blue gradient accents
 
-## Screenshots
-
-| Dashboard | Log Workout | Workouts List |
-|-----------|-------------|---------------|
-| ![Dashboard](screenshots/dashboard.png) | ![Log Workout](screenshots/log_workout.png) | ![Workouts](screenshots/workouts.png) |
 
 ## Tech Stack
 
