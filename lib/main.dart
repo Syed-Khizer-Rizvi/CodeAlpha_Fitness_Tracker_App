@@ -6,6 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const FitnessTrackerApp());
 }
 
@@ -53,7 +54,7 @@ class DatabaseHelper {
 
   static Future<Database> _initDB() async {
     String dbPath = await getDatabasesPath();
-    String path = p.join(dbPath, 'fitness_tracker.db');
+    String path = p.join(dbPath, 'fittrack_v3.db');
 
     return await openDatabase(
       path,
@@ -165,9 +166,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    DashboardPage(),
-    WorkoutListPage(),
+  List<Widget> get _pages => [
+    DashboardPage(key: ValueKey('dash_$_currentIndex')),
+    WorkoutListPage(key: ValueKey('work_$_currentIndex')),
   ];
 
   @override
@@ -179,13 +180,13 @@ class _HomePageState extends State<HomePage> {
           color: const Color(0xFF1A1A2E),
           border: Border(
             top: BorderSide(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: Colors.white.withOpacity(0.08),
             ),
           ),
         ),
         child: NavigationBar(
           backgroundColor: Colors.transparent,
-          indicatorColor: const Color(0xFF7C4DFF).withValues(alpha: 0.2),
+          indicatorColor: const Color(0xFF7C4DFF).withOpacity(0.2),
           selectedIndex: _currentIndex,
           onDestinationSelected: (index) {
             setState(() {
@@ -276,10 +277,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F1E),
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _loadData,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
+        child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,48 +305,30 @@ class _DashboardPageState extends State<DashboardPage> {
                           DateFormat('EEEE, MMM d').format(DateTime.now()),
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.5),
+                            color: Colors.white.withOpacity(0.5),
                           ),
                         ),
                       ],
                     ),
-                    GestureDetector(
-                      onTap: () async {
+                    ElevatedButton.icon(
+                      onPressed: () async {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => const AddWorkoutPage()),
                         );
                         _loadData();
                       },
-                      child: Container(
+                      icon: const Icon(Icons.add, size: 20),
+                      label: const Text(
+                        'Log Workout',
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF7C4DFF),
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF7C4DFF), Color(0xFF448AFF)],
-                          ),
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF7C4DFF).withValues(alpha: 0.4),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.add, color: Colors.white, size: 20),
-                            SizedBox(width: 6),
-                            Text(
-                              'Log Workout',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 8,
                       ),
                     ),
                   ],
@@ -424,7 +404,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     color: const Color(0xFF1A1A2E),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.06),
+                      color: Colors.white.withOpacity(0.06),
                     ),
                   ),
                   child: weeklyCalories.isEmpty
@@ -505,7 +485,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               drawVerticalLine: false,
                               horizontalInterval: _getMaxY() / 4,
                               getDrawingHorizontalLine: (value) => FlLine(
-                                color: Colors.white.withValues(alpha: 0.04),
+                                color: Colors.white.withOpacity(0.04),
                                 strokeWidth: 1,
                               ),
                             ),
@@ -556,7 +536,6 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
           ),
-        ),
       ),
     );
   }
@@ -614,7 +593,7 @@ class _GradientStatCard extends StatelessWidget {
         color: const Color(0xFF1A1A2E),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.06),
+          color: Colors.white.withOpacity(0.06),
         ),
       ),
       child: Column(
@@ -624,7 +603,7 @@ class _GradientStatCard extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [gradient[0].withValues(alpha: 0.2), gradient[1].withValues(alpha: 0.1)],
+                colors: [gradient[0].withOpacity(0.2), gradient[1].withOpacity(0.1)],
               ),
               borderRadius: BorderRadius.circular(10),
             ),
@@ -645,7 +624,7 @@ class _GradientStatCard extends StatelessWidget {
             '$label · $unit',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.45),
+              color: Colors.white.withOpacity(0.45),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -685,7 +664,7 @@ class _GoalProgressCard extends StatelessWidget {
         color: const Color(0xFF1A1A2E),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.06),
+          color: Colors.white.withOpacity(0.06),
         ),
       ),
       child: Row(
@@ -693,7 +672,7 @@ class _GoalProgressCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
+              color: color.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 22),
@@ -718,7 +697,7 @@ class _GoalProgressCard extends StatelessWidget {
                       '$current / $goal $unit',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.4),
+                        color: Colors.white.withOpacity(0.4),
                       ),
                     ),
                   ],
@@ -729,7 +708,7 @@ class _GoalProgressCard extends StatelessWidget {
                     Container(
                       height: 8,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.12),
+                        color: color.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -739,12 +718,12 @@ class _GoalProgressCard extends StatelessWidget {
                         height: 8,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [color, color.withValues(alpha: 0.7)],
+                            colors: [color, color.withOpacity(0.7)],
                           ),
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: color.withValues(alpha: 0.4),
+                              color: color.withOpacity(0.4),
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
@@ -759,7 +738,7 @@ class _GoalProgressCard extends StatelessWidget {
                   '$percentage% completed',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: Colors.white.withOpacity(0.3),
                   ),
                 ),
               ],
@@ -811,14 +790,14 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
         title: const Text('Delete Workout', style: TextStyle(color: Colors.white)),
         content: Text(
           'Are you sure you want to delete this workout?',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+          style: TextStyle(color: Colors.white.withOpacity(0.6)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+              style: TextStyle(color: Colors.white.withOpacity(0.5)),
             ),
           ),
           TextButton(
@@ -893,31 +872,23 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                       color: Colors.white,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () async {
+                  ElevatedButton(
+                    onPressed: () async {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const AddWorkoutPage()),
                       );
                       _loadWorkouts();
                     },
-                    child: Container(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7C4DFF),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF7C4DFF), Color(0xFF448AFF)],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF7C4DFF).withValues(alpha: 0.4),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.add, color: Colors.white, size: 22),
+                      minimumSize: const Size(44, 44),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 8,
                     ),
+                    child: const Icon(Icons.add, size: 22),
                   ),
                 ],
               ),
@@ -934,7 +905,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                           Icon(
                             Icons.fitness_center_rounded,
                             size: 64,
-                            color: Colors.white.withValues(alpha: 0.15),
+                            color: Colors.white.withOpacity(0.15),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -942,7 +913,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.3),
+                              color: Colors.white.withOpacity(0.3),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -950,7 +921,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                             'Tap + to log your first workout!',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: Colors.white.withOpacity(0.2),
                             ),
                           ),
                         ],
@@ -975,7 +946,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                               color: const Color(0xFF1A1A2E),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.06),
+                                color: Colors.white.withOpacity(0.06),
                               ),
                             ),
                             child: Row(
@@ -983,7 +954,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                                 Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: exerciseColor.withValues(alpha: 0.15),
+                                    color: exerciseColor.withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
@@ -1010,7 +981,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                                         '${w['duration']} min  ·  ${w['calories']} kcal  ·  ${w['steps']} steps',
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: Colors.white.withValues(alpha: 0.4),
+                                          color: Colors.white.withOpacity(0.4),
                                         ),
                                       ),
                                       const SizedBox(height: 4),
@@ -1018,7 +989,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                                         isToday ? 'Today' : DateFormat('MMM d, yyyy').format(date),
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color: Colors.white.withValues(alpha: 0.25),
+                                          color: Colors.white.withOpacity(0.25),
                                         ),
                                       ),
                                     ],
@@ -1027,7 +998,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                                 PopupMenuButton<String>(
                                   icon: Icon(
                                     Icons.more_vert,
-                                    color: Colors.white.withValues(alpha: 0.3),
+                                    color: Colors.white.withOpacity(0.3),
                                   ),
                                   color: const Color(0xFF252540),
                                   shape: RoundedRectangleBorder(
@@ -1139,23 +1110,42 @@ class _AddWorkoutPageState extends State<AddWorkoutPage> {
   }
 
   Future<void> _saveWorkout() async {
+    if (!mounted) return;
     if (!_formKey.currentState!.validate()) return;
 
-    final workout = {
-      'exercise': _exerciseController.text.trim(),
-      'duration': int.parse(_durationController.text.trim()),
-      'calories': int.parse(_caloriesController.text.trim()),
-      'steps': int.tryParse(_stepsController.text.trim()) ?? 0,
-      'date': DateFormat('yyyy-MM-dd').format(_selectedDate),
-    };
+    try {
+      final workout = {
+        'exercise': _exerciseController.text.trim(),
+        'duration': int.parse(_durationController.text.trim()),
+        'calories': int.parse(_caloriesController.text.trim()),
+        'steps': int.tryParse(_stepsController.text.trim()) ?? 0,
+        'date': DateFormat('yyyy-MM-dd').format(_selectedDate),
+      };
 
-    if (widget.workout != null) {
-      await DatabaseHelper.updateWorkout(widget.workout!['id'], workout);
-    } else {
-      await DatabaseHelper.insertWorkout(workout);
+      if (widget.workout != null) {
+        await DatabaseHelper.updateWorkout(widget.workout!['id'], workout);
+      } else {
+        await DatabaseHelper.insertWorkout(workout);
+      }
+
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Save Error'),
+            content: Text('Error: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     }
-
-    if (mounted) Navigator.pop(context);
   }
 
   Future<void> _pickDate() async {
@@ -1186,17 +1176,17 @@ class _AddWorkoutPageState extends State<AddWorkoutPage> {
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+      labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
       prefixIcon: Icon(icon, color: const Color(0xFF7C4DFF), size: 20),
       filled: true,
       fillColor: const Color(0xFF1A1A2E),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -1244,7 +1234,7 @@ class _AddWorkoutPageState extends State<AddWorkoutPage> {
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: Colors.white.withValues(alpha: 0.6),
+                  color: Colors.white.withOpacity(0.6),
                 ),
               ),
               const SizedBox(height: 12),
@@ -1260,30 +1250,18 @@ class _AddWorkoutPageState extends State<AddWorkoutPage> {
                       });
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
-                        gradient: isSelected
-                            ? const LinearGradient(
-                                colors: [Color(0xFF7C4DFF), Color(0xFF448AFF)],
-                              )
-                            : null,
-                        color: isSelected ? null : const Color(0xFF1A1A2E),
+                        color: isSelected ? const Color(0xFF7C4DFF) : const Color(0xFF1A1A2E),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isSelected
-                              ? Colors.transparent
-                              : Colors.white.withValues(alpha: 0.08),
+                          color: isSelected ? Colors.transparent : Colors.white.withOpacity(0.08),
                         ),
                       ),
                       child: Text(
                         type,
                         style: TextStyle(
-                          color: isSelected
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.5),
+                          color: isSelected ? Colors.white : Colors.white.withOpacity(0.5),
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                           fontSize: 13,
                         ),
@@ -1353,7 +1331,7 @@ class _AddWorkoutPageState extends State<AddWorkoutPage> {
                     color: const Color(0xFF1A1A2E),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08),
+                      color: Colors.white.withOpacity(0.08),
                     ),
                   ),
                   child: Row(
@@ -1379,36 +1357,27 @@ class _AddWorkoutPageState extends State<AddWorkoutPage> {
               const SizedBox(height: 30),
 
               // Save Button
-              GestureDetector(
-                onTap: _saveWorkout,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF7C4DFF), Color(0xFF448AFF)],
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: _saveWorkout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7C4DFF),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF7C4DFF).withValues(alpha: 0.4),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
+                    elevation: 8,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        isEditing ? Icons.save_rounded : Icons.add_rounded,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 10),
+                      Icon(isEditing ? Icons.save_rounded : Icons.add_rounded),
+                      const SizedBox(width: 8),
                       Text(
                         isEditing ? 'Update Workout' : 'Save Workout',
                         style: const TextStyle(
-                          color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
@@ -1417,6 +1386,8 @@ class _AddWorkoutPageState extends State<AddWorkoutPage> {
                   ),
                 ),
               ),
+
+              const SizedBox(height: 30),
             ],
           ),
         ),
